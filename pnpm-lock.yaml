@@ -1,6 +1,7 @@
 lockfileVersion: 5.4
 
 specifiers:
+  '@crankshaft/types': ^0.2.2
   '@rollup/plugin-commonjs': ^21.1.0
   '@rollup/plugin-json': ^4.1.0
   '@rollup/plugin-node-resolve': ^13.3.0
@@ -21,6 +22,7 @@ dependencies:
   react-icons: 4.4.0
 
 devDependencies:
+  '@crankshaft/types': 0.2.2
   '@rollup/plugin-commonjs': 21.1.0_rollup@2.77.1
   '@rollup/plugin-json': 4.1.0_rollup@2.77.1
   '@rollup/plugin-node-resolve': 13.3.0_rollup@2.77.1
@@ -35,6 +37,10 @@ devDependencies:
   typescript: 4.7.4
 
 packages:
+
+  /@crankshaft/types/0.2.2:
+    resolution: {integrity: sha512-MnXvQcOGEbtZz2ZcZpmyhKEWkZN7AoEz+oPV5r/2oU1CZ4CvEhUnU+VB+XKfOQ9/XE/yLIpc3K0JsfzMn2XRcg==}
+    dev: true
 
   /@jridgewell/gen-mapping/0.3.2:
     resolution: {integrity: sha512-mh65xKQAzI6iBcFzwv28KVWSmCkdRBWoOh+bYQGW3+6OZvbbN3TqMGo5hqYxQniRcH9F2VZIoJCm4pa3BPDK/A==}

@@ -1,0 +1,28 @@
+name = "vibrantCrankshaft"
+version = "1.0.0"
+link = "https://github.com/ShadowBlip/vibrantCrankshaft"
+source = "https://github.com/ShadowBlip/vibrantCrankshaft"
+min-crankshaft-version = "0.2.2"
+
+[author]
+name = "William Edwards"
+link = "https://github.com/ShadowApex"
+
+[entrypoints]
+
+	[entrypoints.desktop]
+	library = false
+	menu = false
+
+	[entrypoints.deck]
+	library = true
+	menu = false
+	quick-access = false
+
+[store]
+description = """
+Set vibrancy (saturation) of your screen.
+
+Based off of vibrantDeck from Scrumplex.
+"""
+
