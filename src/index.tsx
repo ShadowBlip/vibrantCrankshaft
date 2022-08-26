@@ -92,6 +92,9 @@ function Content({ runningApps, applyFn }: ContentProps) {
               : "global") +
             " profile"
           }
+          gamepadGroup="root"
+          gamepadItem="per-app-toggle"
+          gamepadFocused="true"
           checked={currentAppOverride && currentAppOverridable}
           disabled={!currentAppOverridable}
           onChange={(override) => {
@@ -104,10 +107,12 @@ function Content({ runningApps, applyFn }: ContentProps) {
           label="Saturation"
           description="Control the saturation of the display"
           value={currentTargetSaturation}
-          step={5}
+          step={20}
           max={400}
           min={0}
           showValue={true}
+          gamepadGroup="root"
+          gamepadItem="saturation-slider"
           onChange={(saturation: number) => {
             setCurrentTargetSaturation(saturation);
           }}
