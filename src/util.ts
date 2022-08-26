@@ -1,8 +1,5 @@
-import { Router, ServerAPI } from "decky-frontend-lib";
-
-interface SaturationArgs {
-  saturation: number
-}
+import { SMM } from "@crankshaft/types";
+import { ServerAPI } from "./deckyshaft/deckyshaft";
 
 type ActiveAppChangedHandler = (newAppId: string, oldAppId: string) => void;
 type UnregisterFn = () => void;
@@ -13,9 +10,14 @@ export class RunningApps {
   private listeners: ActiveAppChangedHandler[] = [];
   private lastAppId: string = "";
   private intervalId: any;
+  private smm: SMM;
+
+  constructor(smm: SMM) {
+    this.smm = smm;
+  }
 
   private pollActive() {
-    const newApp = RunningApps.active();
+    const newApp = this.active();
     if (this.lastAppId != newApp) {
       this.listeners.forEach((h) => h(newApp, this.lastAppId));
     }
@@ -28,8 +30,7 @@ export class RunningApps {
   }
 
   unregister() {
-    if (this.intervalId != undefined)
-      clearInterval(this.intervalId);
+    if (this.intervalId != undefined) clearInterval(this.intervalId);
 
     this.listeners.splice(0, this.listeners.length);
   }
@@ -41,8 +42,8 @@ export class RunningApps {
     };
   }
 
-  static active() {
-    return Router.MainRunningApp?.appid || DEFAULT_APP;
+  active() {
+    return this.smm.currentAppId || DEFAULT_APP;
   }
 }
 
@@ -55,6 +56,6 @@ export class Backend {
 
   applySaturation(saturation: number) {
     console.log("Applying saturation " + saturation.toString());
-    this.serverAPI.callPluginMethod<SaturationArgs, boolean>("set_saturation", { "saturation": saturation / 100.0 });
+    this.serverAPI.callPluginMethod("set_saturation", [saturation / 100.0]);
   }
 }

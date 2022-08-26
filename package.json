@@ -1,56 +1,24 @@
 {
-  "name": "vibrant-deck",
-  "version": "1.1.2",
+  "name": "vibrant-crankshaft",
+  "version": "1.0.0",
   "description": "Set vibrancy (saturation) of your screen",
-  "scripts": {
-    "build": "shx rm -rf dist && rollup -c",
-    "watch": "rollup -c -w",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/SteamDeckHomebrew/decky-plugin-template.git"
-  },
-  "keywords": [
-    "decky",
-    "plugin",
-    "vibrant",
-    "x11",
-    "libvibrant",
-    "steam-deck",
-    "deck"
-  ],
-  "author": "Sefa Eyeoglu <contact@scrumplex.net>",
+  "main": "dist/index.js",
+  "author": "William Edwards <shadowapex@gmail.com>",
   "license": "GPL-3.0-or-later",
-  "bugs": {
-    "url": "https://github.com/SteamDeckHomebrew/decky-plugin-template/issues"
-  },
-  "homepage": "https://github.com/SteamDeckHomebrew/decky-plugin-template#readme",
-  "devDependencies": {
-    "@rollup/plugin-commonjs": "^21.1.0",
-    "@rollup/plugin-json": "^4.1.0",
-    "@rollup/plugin-node-resolve": "^13.3.0",
-    "@rollup/plugin-replace": "^4.0.0",
-    "@rollup/plugin-typescript": "^8.3.3",
-    "@types/react": "16.14.0",
-    "@types/webpack": "^5.28.0",
-    "rollup": "^2.77.1",
-    "rollup-plugin-import-assets": "^1.1.1",
-    "shx": "^0.3.4",
-    "tslib": "^2.4.0",
-    "typescript": "^4.7.4",
-    "typescript-json-serializer": "^4.2.0"
+  "private": true,
+  "scripts": {
+    "format": "prettier src --write",
+    "build": "esbuild src/index.tsx --bundle --format=esm --define:process='{\"env\":{\"NODE_ENV\":\"development\"}}' --jsx-factory=h --jsx-fragment=DocumentFragment --inject:./preact-shim.js --outfile=dist/index.js",
+    "build-watch": "esbuild src/index.tsx --bundle --format=esm --outfile=dist/index.js --watch"
   },
   "dependencies": {
-    "decky-frontend-lib": "^1.7.5",
-    "react-icons": "^4.4.0"
+    "preact": "^10.7.1"
   },
-  "pnpm": {
-    "peerDependencyRules": {
-      "ignoreMissing": [
-        "react",
-        "react-dom"
-      ]
-    }
+  "devDependencies": {
+    "@crankshaft/types": "^0.2.4",
+    "esbuild": "^0.14.30",
+    "prettier": "^2.6.2",
+    "prettier-plugin-organize-imports": "^2.3.4",
+    "typescript": "^4.6.3"
   }
 }

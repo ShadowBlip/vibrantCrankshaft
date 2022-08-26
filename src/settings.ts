@@ -1,25 +1,25 @@
-import { JsonObject, JsonProperty, JsonSerializer } from 'typescript-json-serializer';
-import { DEFAULT_APP } from './util';
+import { DEFAULT_APP } from "./util";
 
 const SETTINGS_KEY = "vibrantDeck";
 
-const serializer = new JsonSerializer();
+interface RawAppSetting {
+  saturation?: number;
+}
 
-@JsonObject()
 export class AppSetting {
-  @JsonProperty()
   saturation?: number;
 
   hasSettings(): boolean {
-    if (this.saturation != undefined)
-      return true;
+    if (this.saturation != undefined) return true;
     return false;
   }
 }
 
-@JsonObject()
+interface RawSettings {
+  perApp: { [appId: string]: RawAppSetting };
+}
+
 export class Settings {
-  @JsonProperty({ isDictionary: true, type: AppSetting })
   perApp: { [appId: string]: AppSetting } = {};
 
   ensureApp(appId: string): AppSetting {
@@ -39,15 +39,37 @@ export class Settings {
   }
 }
 
+function deserialize(rawSettings: RawSettings): Settings {
+  const settings = new Settings();
+  for (let appId in rawSettings.perApp) {
+    const rawAppSetting = rawSettings.perApp[appId];
+    const appSetting = new AppSetting();
+    appSetting.saturation = rawAppSetting.saturation;
+    settings.perApp[appId] = appSetting;
+  }
+  return settings;
+}
+
+function serialize(settings: Settings): RawSettings {
+  const rawSettings: RawSettings = { perApp: {} };
+  for (let appId in settings.perApp) {
+    const appSetting = settings.perApp[appId];
+    const rawAppSetting: RawAppSetting = {};
+    rawAppSetting.saturation = appSetting.saturation;
+    rawSettings.perApp[appId] = rawAppSetting;
+  }
+  return rawSettings;
+}
+
 export function loadSettingsFromLocalStorage(): Settings {
   const settingsString = localStorage.getItem(SETTINGS_KEY) || "{}";
   const settingsJson = JSON.parse(settingsString);
-  const settings = serializer.deserializeObject(settingsJson, Settings);
+  const settings = deserialize(settingsJson);
   return settings || new Settings();
 }
 
 export function saveSettingsToLocalStorage(settings: Settings) {
-  const settingsJson = serializer.serializeObject(settings) || {};
+  const settingsJson = serialize(settings) || {};
   const settingsString = JSON.stringify(settingsJson);
   localStorage.setItem(SETTINGS_KEY, settingsString);
 }
