@@ -134,12 +134,9 @@ export const load = async (smm: SMM) => {
   await deckyshaft.start();
 
   // load settings
-  console.info("Loading settings from local storage");
   settings = loadSettingsFromLocalStorage();
 
-  console.info("Creating new plugin backend");
   const backend = new Backend(deckyshaft);
-  console.info("Creating RunningApps");
   const runningApps = new RunningApps(smm);
 
   const applySettings = (appId: string) => {
@@ -147,11 +144,9 @@ export const load = async (smm: SMM) => {
     backend.applySaturation(saturation);
   };
 
-  console.info("Registering running apps");
   runningApps.register();
 
   // apply initially
-  console.info("Apply initial settings");
   applySettings(runningApps.active());
 
   smm.InGameMenu.addMenuItem({

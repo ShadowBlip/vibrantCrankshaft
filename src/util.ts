@@ -10,13 +10,15 @@ export class RunningApps {
   private listeners: ActiveAppChangedHandler[] = [];
   private lastAppId: string = "";
   private intervalId: any;
+  private running: string[] = [];
   private smm: SMM;
 
   constructor(smm: SMM) {
     this.smm = smm;
   }
 
-  private pollActive() {
+  private async pollActive() {
+    this.running = await this.getRunning();
     const newApp = this.active();
     if (this.lastAppId != newApp) {
       this.listeners.forEach((h) => h(newApp, this.lastAppId));
@@ -26,7 +28,7 @@ export class RunningApps {
 
   register() {
     if (this.intervalId == undefined)
-      this.intervalId = setInterval(() => this.pollActive(), 100);
+      this.intervalId = setInterval(() => this.pollActive(), 200);
   }
 
   unregister() {
@@ -43,7 +45,23 @@ export class RunningApps {
   }
 
   active() {
-    return this.smm.currentAppId || DEFAULT_APP;
+    return this.running.length > 0 ? this.running[0] : DEFAULT_APP;
+  }
+
+  // NOTE: This is a hack until we can get this functionality native to Crankshaft
+  // across all contexts/"tabs"
+  private async getRunning(): Promise<string[]> {
+    const out = await this.smm.Exec.run("bash", [
+      "-c",
+      "ps a | grep -Eo 'SteamLaunch AppId=[0-9]+?' | grep -v '=$' | cut -d'=' -f2",
+    ]);
+    if (out.exitCode !== 0) {
+      return [];
+    }
+    const running = (out.stdout as string)
+      .split("\n")
+      .filter((appId) => appId !== "");
+    return running;
   }
 }
 

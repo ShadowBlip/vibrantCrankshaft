@@ -48,7 +48,10 @@ export class SliderField extends Component<SliderProps, SliderState> {
   }
 
   componentDidUpdate(prevProps: SliderProps, prevState: SliderState): void {
-    if (this.state.currentVal === undefined && this.props.value !== undefined) {
+    if (
+      this.props.value !== undefined &&
+      this.state.currentVal !== this.props.value
+    ) {
       this.setState({ currentVal: this.props.value });
     }
   }

@@ -40,7 +40,10 @@ export class ToggleField extends Component<ToggleProps, ToggleState> {
   }
 
   componentDidUpdate(prevProps: ToggleProps, prevState: ToggleState): void {
-    if (this.state.toggled === undefined && this.props.checked !== undefined) {
+    if (
+      this.props.checked !== undefined &&
+      this.state.toggled !== this.props.checked
+    ) {
       this.setState({ toggled: this.props.checked });
     }
   }
@@ -50,14 +53,14 @@ export class ToggleField extends Component<ToggleProps, ToggleState> {
     this.setState({
       toggled: toggled,
     });
+    if (!this.props.onChange) {
+      return;
+    }
+    this.props.onChange(toggled);
   }
 
   private async onChange(_e: Event) {
     this.toggle();
-    if (!this.props.onChange) {
-      return;
-    }
-    this.props.onChange(this.state.toggled);
   }
 
   render(props: ToggleProps, state: ToggleState) {
@@ -65,6 +68,8 @@ export class ToggleField extends Component<ToggleProps, ToggleState> {
     const fieldClasses = state.focused
       ? `${FIELD_CLASSES} ${GAMEPAD_FOCUSED}`
       : FIELD_CLASSES;
+    const onClick = props.disabled ? () => {} : (e: Event) => this.onChange(e);
+
     return (
       <div class={fieldClasses}>
         <div class="gamepaddialog_FieldLabelRow_H9WOq">
@@ -72,7 +77,7 @@ export class ToggleField extends Component<ToggleProps, ToggleState> {
           <div
             ref={this.ref}
             class={buttonClasses}
-            onClick={(e: Event) => this.onChange(e)}
+            onClick={onClick}
             data-cs-gp-in-group={props.gamepadGroup}
             data-cs-gp-item={props.gamepadItem}
             data-cs-gp-init-focus={props.gamepadFocused}
