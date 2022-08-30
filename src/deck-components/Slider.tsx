@@ -1,5 +1,5 @@
 import { Component, createRef } from "preact";
-import { GAMEPAD_FOCUSED, onGamepadFocus } from "./Gamepad";
+import { BTN_CODE, GAMEPAD_FOCUSED, onGamepadFocus } from "./Gamepad";
 
 const FIELD_CLASSES =
   "gamepaddialog_Field_S-_La gamepaddialog_WithFirstRow_qFXi6 gamepaddialog_WithChildrenBelow_1u5FT gamepaddialog_VerticalAlignCenter_3XNvA gamepaddialog_InlineWrapShiftsChildrenBelow_pHUb6 gamepaddialog_WithBottomSeparatorStandard_3s1Rk gamepaddialog_ChildrenWidthFixed_1ugIU gamepaddialog_ExtraPaddingOnChildrenBelow_5UO-_ gamepaddialog_StandardPadding_XRBFu gamepaddialog_HighlightOnFocus_wE4V6 Panel Focusable";
@@ -18,10 +18,9 @@ export interface SliderProps {
 }
 
 export interface SliderState {
+  propValue?: number;
   currentVal?: number;
-  currentStep?: number;
   focused?: boolean;
-  sliderPercent: number;
 }
 
 export class SliderField extends Component<SliderProps, SliderState> {
@@ -36,10 +35,47 @@ export class SliderField extends Component<SliderProps, SliderState> {
     this.props.onChange(this.state.currentVal!);
   }
 
-  async componentDidMount() {
+  componentDidMount() {
     if (!this.ref.current) {
       return;
     }
+
+    const options = {
+      capture: true,
+      passive: true,
+      once: false,
+    };
+    this.ref.current.addEventListener(
+      "cs-gp-button-down",
+      (event: any) => {
+        // Ignore button presses we don't care about
+        if (
+          ![BTN_CODE.RIGHT, BTN_CODE.LEFT].includes(event.detail.buttonCode)
+        ) {
+          return;
+        }
+
+        const step = this.props.step ? this.props.step : 1;
+        const min = this.props.min ? this.props.min : 0;
+        const max = this.props.max ? this.props.max : 100;
+        const current =
+          this.state.currentVal !== undefined ? this.state.currentVal : max;
+
+        if (event.detail.buttonCode === BTN_CODE.RIGHT) {
+          const value = Math.min(max, current + step);
+          this.setState({ currentVal: value });
+          this.props.onChange(value);
+          return;
+        }
+        if (event.detail.buttonCode === BTN_CODE.LEFT) {
+          const value = Math.max(min, current - step);
+          this.setState({ currentVal: value });
+          this.props.onChange(value);
+          return;
+        }
+      },
+      options
+    );
 
     // Watch for gamepad focus events
     onGamepadFocus(this.ref.current, (isFocused) => {
@@ -50,9 +86,13 @@ export class SliderField extends Component<SliderProps, SliderState> {
   componentDidUpdate(prevProps: SliderProps, prevState: SliderState): void {
     if (
       this.props.value !== undefined &&
+      this.props.value !== this.state.propValue &&
       this.state.currentVal !== this.props.value
     ) {
-      this.setState({ currentVal: this.props.value });
+      this.setState({
+        currentVal: this.props.value,
+        propValue: this.props.value,
+      });
     }
   }
 
@@ -82,12 +122,6 @@ export class SliderField extends Component<SliderProps, SliderState> {
     await this.onHandleMove(e, touchLocation);
   }
 
-  // Extract X of mouse location.
-  async onHandleMouse(e: MouseEvent) {
-    let touchLocation = e.layerX;
-    await this.onHandleMove(e, touchLocation);
-  }
-
   // Handle moving the slider by the given touch location.
   async onHandleMove(e: Event, touchLocation: number) {
     console.log(e);
@@ -114,20 +148,9 @@ export class SliderField extends Component<SliderProps, SliderState> {
     return (value - this.props.min!) / (this.props.max! - this.props.min!);
   }
 
-  // Update the slider if our notch state changes
-  onStepChange(step: number) {
-    console.log(`Selecting notch ${step}`);
-    const steps = this.props.step ? this.props.step : 0;
-    const sliderPercent = step / (steps - 1);
-    const newValue = this.getValueFromPercent(sliderPercent);
-    this.setState({ currentVal: newValue });
-    this.props.onChange(newValue);
-  }
-
   render(props: SliderProps, state: SliderState) {
     const current = props.showValue ? state.currentVal : "";
-    const numSteps = props.step ? props.step : 0;
-    const steps: number[] = [...Array(numSteps).keys()];
+    // const sliderStyle = `outline: white solid 0px; --normalized-slider-value: ${this.getPercentFromValue(
     const sliderStyle = `--normalized-slider-value: ${this.getPercentFromValue(
       state.currentVal || props.min || 0
     )}`;
@@ -151,7 +174,8 @@ export class SliderField extends Component<SliderProps, SliderState> {
             class="gamepadslider_SliderControl_3o137"
             style={sliderStyle}
             data-cs-gp-in-group={props.gamepadGroup}
-            data-cs-gp-group={props.gamepadItem}
+            data-cs-gp-item={props.gamepadItem}
+            data-cs-gp-item-custom-events="true"
             ontouchstart={(e) => this.onTouchStart(e)}
             ontouchmove={(e) => this.onTouchMove(e)}
             ontouchend={(e) => this.onTouchEnd(e)}
@@ -159,15 +183,7 @@ export class SliderField extends Component<SliderProps, SliderState> {
             <div class="gamepadslider_SliderTrack_Mq25N gamepadslider_SliderHasNotches_2XiAy" />
             <div class="gamepadslider_SliderHandleContainer_1pQZi">
               <div class="gamepadslider_SliderHandle_2yVKj" />
-              <div class="gamepadslider_SliderNotchContainer_2N-a5 Panel Focusable">
-                {steps.map((step: number) => (
-                  <Notch
-                    index={step}
-                    onFocus={() => this.onStepChange(step)}
-                    gamepadGroup={props.gamepadItem}
-                  />
-                ))}
-              </div>
+              <div class="gamepadslider_SliderNotchContainer_2N-a5 Panel Focusable"></div>
             </div>
           </div>
         </div>
